@@ -80,10 +80,14 @@ class i2c_monitor extends uvm_monitor;
         // Loop to capture data bytes until a STOP or REPEATED START
         forever begin
           stop_or_restart_detected = 0;
-          // Watch for STOP, REPEATED START, or next byte
+
+          // Wait for SCL to go high (start of bit valid window)
+          @(posedge vif.scl);
+          current_byte[7] = vif.sda; // Optimistically sample the data bit
+
+          // Watch for STOP, REPEATED START during the high period, or end of bit (SCL falling)
           fork
             begin: check_stop
-              @(posedge vif.scl); // SCL must go high for STOP/RESTART
               @(posedge vif.sda);
               if (vif.scl == 1'b1) begin
                 `uvm_info(get_type_name(), "STOP condition detected", UVM_HIGH)
@@ -91,7 +95,6 @@ class i2c_monitor extends uvm_monitor;
               end
             end
             begin: check_restart
-              @(posedge vif.scl);
               @(negedge vif.sda);
               if (vif.scl == 1'b1) begin
                 `uvm_info(get_type_name(), "REPEATED START detected", UVM_HIGH)
@@ -99,8 +102,7 @@ class i2c_monitor extends uvm_monitor;
               end
             end
             begin: check_next_byte
-              @(posedge vif.scl);
-              // This path proceeds to read the data bit
+              @(negedge vif.scl);
             end
           join_any
           disable fork;
@@ -108,10 +110,6 @@ class i2c_monitor extends uvm_monitor;
           if (stop_or_restart_detected) begin
             break; // Exit data gathering loop
           end
-
-          // At this point, we are at the posedge of SCL for the first bit of the new byte.
-          current_byte[7] = vif.sda;
-          @(negedge vif.scl);
 
           // Sample remaining 7 data bits
           for (int i = 6; i >= 0; i--) begin

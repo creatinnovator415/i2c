@@ -18,8 +18,9 @@ class i2c_sequence extends uvm_sequence #(i2c_seq_item); // Defines a sequence c
         // 2. You can create a series of transactions (e.g., a write followed by a read).
         // 3. The example below sends one basic randomized transaction.
         
-        start_item(item); // Sends the transaction to the driver and waits for it to be accepted.
+        // First, randomize the item to define its properties.
         assert(item.randomize()); // Randomizes the transaction item's properties.
+        start_item(item); // Sends the transaction to the driver and waits for it to be accepted.
         finish_item(item); // Waits for the driver to signal completion and updates the item with any response data.
 
     endtask
