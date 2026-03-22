@@ -5,6 +5,7 @@ package i2c_pkg; // Defines a package named 'i2c_pkg'.
     `include "i2c_seq_item.sv" // Includes the transaction item definition.
     `include "i2c_driver.sv" // Includes the driver class definition.
     `include "i2c_monitor.sv" // Includes the monitor class definition.
+    `include "i2c_ref_model.sv" // Includes the reference model class definition.
     `include "i2c_agent.sv" // Includes the agent class definition.
     `include "i2c_scoreboard.sv" // Includes the scoreboard class definition.
     `include "i2c_env.sv" // Includes the environment class definition.
